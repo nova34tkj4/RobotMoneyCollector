@@ -1,18 +1,87 @@
-import Grid from "./components/Grid";
+import Grid, { type RobotPosition } from "./components/Grid";
 import Modal from "./components/Modal";
 import compass from "./assets/compass.png";
 import * as React from "react";
 import Input from "./components/Input";
+import { COMMANDS, ERRORS, FACING_DIRECTIONS, ORIENTATION } from "./constants";
+import { isRobotOnTable, isValidCoordinate } from "./utils";
 
 function App() {
   const [textCommand, setTextCommand] = React.useState('');
   const [rows, setRows] = React.useState<number>();
   const [cols, setCols] = React.useState<number>();
+  const [errorMessage, setErrorMessage] = React.useState('');
+  const [robotPosition, setRobotPosition] = React.useState<RobotPosition>({ x: undefined, y: undefined, f: 'EAST'});
+  const [isRobotPlaced, setIsRobotPlaced] = React.useState(false);
+
   const runCommand = () => {
     const commandVal = textCommand.split(/[\s,]+/);
     const command = commandVal[0];
-    alert
+    if (command) {
+      if (!COMMANDS.includes(command)) {
+        setErrorMessage(ERRORS.INVALID_COMMAND)
+        return;
+      } else {
+        switch (command) {
+          case 'PLACE': {
+            if (commandVal.length < 4) {
+              setErrorMessage(ERRORS.INVALID_INITIAL_COMMAND);
+            } else {
+              const x = Number(commandVal[1]);
+              const y = Number(commandVal[2]);
+              const f = commandVal[3];
+      
+              if (!isValidCoordinate(x) || !isValidCoordinate(y)) {
+                setErrorMessage(ERRORS.WRONG_COORDINATE);
+                return;
+              }
+      
+              if (!FACING_DIRECTIONS.includes(f)) {
+                setErrorMessage(ERRORS.WRONG_DIRECTION);
+                return;
+              }
+      
+              if (!isRobotOnTable({ rows, cols, x, y })) {
+                setErrorMessage(ERRORS.WRONG_PLACE);
+                return;
+              }
+              setRobotPosition({x, y, f})
+              setIsRobotPlaced(true);
+            }
+            return;
+          }
+          case 'MOVE': {
+            if (!isRobotPlaced) {
+              setErrorMessage(ERRORS.NOT_INITIALIZED);
+              return;
+            }
+            const {x, y, f} = robotPosition || {};
+            const {x: facingX, y: facingY} = ORIENTATION[f as keyof typeof ORIENTATION] || {};
+            if (x && y) {
+              const nextX = x + facingX;
+              const nextY = y + facingY;
+              console.log("nextX", nextX)
+              console.log("nextX", nextY)
+      
+              if (!isRobotOnTable({ rows, cols, x: nextX, y: nextY })) {
+                setErrorMessage(ERRORS.WRONG_MOVING_DIRECTION);
+                return;
+              }
+              setRobotPosition({x: nextX, y: nextY, f})
+            }
+            return;
+          }
+          case 'LEFT': {
+            return;
+          }
+          case 'RIGHT': {
+            return;
+          }
+        }
+      }
+    }
   }
+
   return (
     <div className='p-20'>
       <h1 className="font-bold text-center text-3xl mb-4">
@@ -27,7 +96,7 @@ function App() {
               type="text"
               placeholder="Your wish is my command"
               value={textCommand}
-              onChange={(val: string) => setTextCommand(val)}
+              onChange={(val: string) => setTextCommand(val.toUpperCase())}
             />
             <button
               onClick={runCommand}
@@ -60,8 +129,13 @@ function App() {
         />
       </div>
       
-      <Grid rows={rows} cols={cols} />
-      <Modal />
+      <Grid rows={rows} cols={cols} robotPosition={robotPosition} />
+      <Modal
+        title="Error Occured"
+        isShow={!!errorMessage}
+        description={errorMessage}
+        onOk={() => setErrorMessage('')}
+      />
       <h1 className="font-bold text-2xl mt-10 mb-4">
         TUTORIAL
       </h1>
