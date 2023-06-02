@@ -5,3 +5,4 @@ Komunal - FullStack - Senior Developer Test
 - TypeScript
 - Vite
 - React
+- TailwindCSS
