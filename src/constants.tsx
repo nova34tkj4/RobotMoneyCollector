@@ -1,1 +1,0 @@
-export const COMMANDS = ['PLACE', 'MOVE', 'LEFT', 'RIGHT'];

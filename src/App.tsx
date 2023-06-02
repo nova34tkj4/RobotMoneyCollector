@@ -1,8 +1,18 @@
 import Grid from "./components/Grid";
 import Modal from "./components/Modal";
 import compass from "./assets/compass.png";
+import * as React from "react";
+import Input from "./components/Input";
 
 function App() {
+  const [textCommand, setTextCommand] = React.useState('');
+  const [rows, setRows] = React.useState<number>();
+  const [cols, setCols] = React.useState<number>();
+  const runCommand = () => {
+    const commandVal = textCommand.split(/[\s,]+/);
+    const command = commandVal[0];
+    alert
+  }
   return (
     <div className='p-20'>
       <h1 className="font-bold text-center text-3xl mb-4">
@@ -12,18 +22,45 @@ function App() {
       <div className="flex flex-row mb-4 items-center">
         <img src={compass} alt="compass" className="w-20" />
         <div className="flex flex-col flex-1">
-          <input type="text" placeholder="Your wish is my command"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 
-            focus:border-blue-500 block w-full p-2.5 
-            dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-            dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 h-14"
-          />
+          <div className="flex flex-row items-center">
+            <Input
+              type="text"
+              placeholder="Your wish is my command"
+              value={textCommand}
+              onChange={(val: string) => setTextCommand(val)}
+            />
+            <button
+              onClick={runCommand}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-2 rounded">
+              Run
+            </button>
+            <button className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+              Reset
+            </button>
+          </div>
           <p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             Available Commands : PLACE X,Y,F | MOVE | LEFT | RIGHT
           </p>
         </div>
       </div>
-      <Grid />
+      <div className="flex flex-row gap-4 mb-4">
+        <Input
+          label="Rows"
+          type="number"
+          placeholder="Input rows number"
+          value={rows}
+          onChange={(val: string) => setRows(Number(val))}
+        />
+        <Input
+          label="Cols"
+          type="number"
+          placeholder="Input columns number"
+          value={cols}
+          onChange={(val: string) => setCols(Number(val))}
+        />
+      </div>
+      
+      <Grid rows={rows} cols={cols} />
       <Modal />
       <h1 className="font-bold text-2xl mt-10 mb-4">
         TUTORIAL
