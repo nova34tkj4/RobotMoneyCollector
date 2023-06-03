@@ -42,7 +42,7 @@ export default function Grid({
     if (moneyEarned === 0) {
       setMoneyEarned(moneyFound);
     } else {
-      setMoneyEarned(moneyFound + (moneyFound * randomInterestRate/100));
+      setMoneyEarned(Math.floor(moneyFound + (moneyFound * randomInterestRate/100)));
     }
     if (moneyFound > 0 && availableMoney === 0) onEmptyMoneyInTheBox?.();
   }, [moneyFound, availableMoney]);

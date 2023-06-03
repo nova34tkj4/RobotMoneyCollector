@@ -159,6 +159,10 @@ function App() {
     setIsReset(val => !val);
   }
 
+  const onSendData = () => {
+    setIsGameOver(false);
+  }
+
   return (
     <div className='p-20'>
       <h1 className="font-bold text-center text-3xl mb-4">
@@ -232,7 +236,7 @@ function App() {
         title="Game Over"
         isShow={isGameOver}
         buttonLabel={"Send Data"}
-        onOk={() => {console.log("Game Over")}}
+        onOk={onSendData}
       />
       <TutorialList />
       <Credits />
