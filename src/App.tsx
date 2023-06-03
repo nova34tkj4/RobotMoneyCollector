@@ -23,7 +23,6 @@ function App() {
   const handleKeyDown = (event: KeyboardEvent) => {
     if (isRobotPlaced && !isFocusTextCommand) {
       event.preventDefault();
-      console.log("Evetn code 2: ", event.code)
       if (event.code === "Space") {
         runCommand('MOVE')
       } else if (event.code === "ArrowLeft") {
@@ -67,7 +66,6 @@ function App() {
     const commandVal = textCommand.split(/[\s,]+/);
     const command = keyboardCommand || commandVal[0];
     const {x, y} = robotPosition || {};
-    console.log("CMD", command)
     if (command) {
       if (!COMMANDS.includes(command)) {
         setErrorMessage(ERRORS.INVALID_COMMAND)
@@ -113,7 +111,6 @@ function App() {
           return;
         }
         case 'MOVE': {
-          console.log("MOVE", totalMove)
           if (totalMove <= 0) {
             setErrorMessage(ERRORS.EMPTY_MOVE);
             return;
@@ -121,7 +118,6 @@ function App() {
           if (x !== undefined && y !== undefined) {
             const nextX = x + facingPosition.x ;
             const nextY = y + facingPosition.y;
-            console.log(nextX, nextY)
     
             if (!isRobotOnTable({ rows, cols, x: nextX, y: nextY })) {
               setErrorMessage(ERRORS.WRONG_MOVING_DIRECTION);

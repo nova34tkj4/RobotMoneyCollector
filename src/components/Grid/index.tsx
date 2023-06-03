@@ -1,6 +1,6 @@
 import * as React from 'react';
 import robot from '../../assets/robot.png'
-import { getRotateClass, getRandomMoney } from '../../utils';
+import { getRotateClass, getRandomMoney, generateRandomNumber } from '../../utils';
 
 export interface RobotPosition {
   x: number | undefined;
@@ -25,7 +25,7 @@ export default function Grid({
   const {x, y} = robotPosition || {};
   const randomMoneyVal = getRandomMoney(rows, cols);
   const randomMoney = React.useRef(randomMoneyVal)
-
+  const randomInterestRate = generateRandomNumber(5, 25)
   
   const rotateClass = getRotateClass(rotateDeg);
   const arrCols = Array.from(Array(cols), (_,i) => i+1)
@@ -79,6 +79,39 @@ export default function Grid({
         </div>
       </div>
       <p className='text-right'>X</p>
+      <div className='bg-blue-100 rounded p-4'>
+        <p className='text-center font-bold mb-4 text-xl'>
+            Your Robot Earning
+        </p>
+        <div className='bg-blue-100'>
+          <div className='flex flex-row'>
+            <div className='flex flex-1 flex-col'>
+              <div className='text-center font-bold'>
+                2000
+              </div>
+              <div className='text-center'>
+                Money Found
+              </div>
+            </div>
+            <div className='flex flex-1 flex-col'>
+              <div className='text-center font-bold'>
+                {randomInterestRate}%
+              </div>
+              <div className='text-center'>
+                Interest Rate
+              </div>
+            </div>
+            <div className='flex flex-1 flex-col'>
+              <div className='text-center font-bold'>
+                2100
+              </div>
+              <div className='text-center'>
+                Money Earned
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   )
