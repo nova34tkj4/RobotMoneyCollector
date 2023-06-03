@@ -19,3 +19,43 @@ export const getRotateClass = (rotateDeg: number) => {
   ROTATE_MAP.set(360, 'rotate-[360deg]');
   return ROTATE_MAP.get(rotateDeg);
 };
+
+export const generateRandomNumber = (min: number, max: number) => 
+  Math.floor(Math.random() * (max - min)) + min;
+
+export const deepMergeObject = (targetObject = {}, sourceObject = {}) => {
+  const copyTargetObject = JSON.parse(JSON.stringify(targetObject));
+  const copySourceObject = JSON.parse(JSON.stringify(sourceObject));
+  Object.keys(copySourceObject).forEach((key) => {
+    if (typeof copySourceObject[key] === "object" && !Array.isArray(copySourceObject[key])) {
+      copyTargetObject[key] = deepMergeObject(
+        copyTargetObject[key],
+        copySourceObject[key]
+      );
+    } else {
+      copyTargetObject[key] = copySourceObject[key];
+    }
+  });
+  return copyTargetObject;
+}
+  
+
+export const getRandomMoney = (rows: number, cols: number) => {
+  let randomMoneyMap = {};
+  const average = Math.floor((cols+rows-1)/2)
+  const randomMoney = Array.from(Array(average), (_,i) => i+1)
+  const randomArr = randomMoney.map(() => {
+    const randomAmount = generateRandomNumber(500, 20000)
+    const randomColIndex = generateRandomNumber(0, cols)
+    const randomRowIndex = generateRandomNumber(0, rows)
+    return {
+      [randomRowIndex]: {
+        [randomColIndex]: randomAmount
+      }
+    }
+  })
+  randomArr.forEach((item) => {
+    randomMoneyMap = deepMergeObject(randomMoneyMap, item);
+  });
+  return randomMoneyMap;
+}

@@ -18,14 +18,26 @@ function App() {
   const [rotateDeg, setRotateDeg] = React.useState(0);
   const [isRobotPlaced, setIsRobotPlaced] = React.useState(false);
   const [totalMove, setTotalMove] = React.useState(15);
+  const [isFocusTextCommand, setFocusTextCommand] = React.useState(false);
+
+  const handleKeyPress = (event: KeyboardEvent) => {
+    if (event.code === "Space" && isRobotPlaced && !isFocusTextCommand) {
+      event.preventDefault();
+      runCommand('MOVE')
+    }
+  }
 
   React.useEffect(() => {
-    document.addEventListener('keyup', (event: KeyboardEvent) => {
-      if (event.code === "Space" && isRobotPlaced) {
-        runCommand('MOVE')
-      }
-    })
-  }, [])
+    document.addEventListener('keypress', handleKeyPress)
+    return () => {
+      document.removeEventListener('keypress', handleKeyPress);
+    }
+  }, [
+    isRobotPlaced,
+    isFocusTextCommand,
+    robotPosition?.x,
+    robotPosition?.y,
+  ])
 
   const moveLeftRight = (type: 'left' | 'right') => {
     const {x, y} = robotPosition || {};
@@ -93,7 +105,6 @@ function App() {
           return;
         }
         case 'MOVE': {
-          console.log("di sini")
           if (totalMove === 0) {
             setErrorMessage(ERRORS.EMPTY_MOVE);
             return;
@@ -101,7 +112,6 @@ function App() {
           if (x !== undefined && y !== undefined) {
             const nextX = x + facingX;
             const nextY = y + facingY;
-            console.log(nextX, nextY)
     
             if (!isRobotOnTable({ rows, cols, x: nextX, y: nextY })) {
               setErrorMessage(ERRORS.WRONG_MOVING_DIRECTION);
@@ -150,7 +160,13 @@ function App() {
               type="text"
               placeholder="Your wish is my command"
               value={textCommand}
-              onChange={(val: string) => setTextCommand(val.toUpperCase())}
+              onChange={(val: string) => {setTextCommand(val.toUpperCase())}}
+              onFocus={() => {
+                setFocusTextCommand(true)
+              }}
+              onBlur={() => {
+                setFocusTextCommand(false)
+              }}
             />
             <button
               onClick={() => runCommand()}
@@ -174,17 +190,18 @@ function App() {
           type="number"
           placeholder="Input rows number"
           value={rows}
-          onChange={(val: string) => setRows(Number(val))}
+          onChange={(val: string) => {setRows(Number(val))}}
         />
         <Input
           label="Cols"
           type="number"
           placeholder="Input columns number"
           value={cols}
-          onChange={(val: string) => setCols(Number(val))}
+          onChange={(val: string) => {setCols(Number(val))}}
         />
       </div>
       <Grid
+        isPlaced={isRobotPlaced}
         totalMove={totalMove}
         rows={rows}
         cols={cols}
@@ -195,7 +212,7 @@ function App() {
         title="Error Occured"
         isShow={!!errorMessage}
         description={errorMessage}
-        onOk={() => setErrorMessage('')}
+        onOk={() => {setErrorMessage('')}}
       />
       <TutorialList />
       <Credits />

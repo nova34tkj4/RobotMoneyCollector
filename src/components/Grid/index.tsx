@@ -1,5 +1,6 @@
+import * as React from 'react';
 import robot from '../../assets/robot.png'
-import { getRotateClass } from '../../utils';
+import { getRotateClass, getRandomMoney } from '../../utils';
 
 export interface RobotPosition {
   x: number | undefined;
@@ -12,10 +13,22 @@ interface GridProps {
   robotPosition?: RobotPosition;
   rotateDeg?: number;
   totalMove: number;
+  isPlaced: boolean;
 }
 
-export default function Grid({cols = 5, rows = 5, robotPosition, rotateDeg = 0, totalMove}: GridProps) {
+export default function Grid({
+  cols = 5,
+  rows = 5,
+  robotPosition,
+  rotateDeg = 0,
+  totalMove,
+  isPlaced,
+}: GridProps) {
   const {x, y} = robotPosition || {};
+  const randomMoneyVal = getRandomMoney(rows, cols);
+  const randomMoney = React.useRef(randomMoneyVal)
+
+  
   const rotateClass = getRotateClass(rotateDeg);
   const arrCols = Array.from(Array(cols), (_,i) => i+1)
   const arrRows = Array.from(Array(rows), (_,i) => i+1)
@@ -36,20 +49,30 @@ export default function Grid({cols = 5, rows = 5, robotPosition, rotateDeg = 0, 
                 className="flex flex-row"
               >
                 {
-                    arrCols.map((_, colIndex) => (
-                      <div
-                        key={colIndex}
-                        className={`flex flex-1 aspect-square border-solid
-                          ${(colIndex + rowIndex)%2 === 0 ? 'bg-blue-200' : 'bg-blue-300'}
-                          ${colIndex === arrCols.length - 1 ? 'border-x-2' : 'border-l-2'}
-                          ${rowIndex === 0 ? 'border-y-2' : 'border-b-2'}
-                          border-blue-100 p-2 flex items-center justify-center`}>
-                            {x === colIndex && y === rowIndex && (
-                              <img src={robot} alt="robot" className={`w-1/2 ${rotateClass}`} />
-                            )}
-                              
-                      </div>
-                    ))
+                    arrCols.map((_, colIndex) => {
+                      const randomMoneyMap = randomMoney.current;
+                      const isMoneyExist = randomMoneyMap && randomMoneyMap[rowIndex as keyof typeof randomMoneyMap] !== undefined 
+                        && randomMoneyMap[rowIndex as keyof typeof randomMoneyMap][colIndex] !== undefined;
+                      const isRobotExist = x !== undefined &&  y !== undefined && x === colIndex && y === rowIndex;
+                      return (
+                        <div
+                          key={colIndex}
+                          className={`flex flex-1 aspect-square border-solid
+                            ${(colIndex + rowIndex)%2 === 0 ? 'bg-blue-200' : 'bg-blue-300'}
+                            ${colIndex === arrCols.length - 1 ? 'border-x-2' : 'border-l-2'}
+                            ${rowIndex === 0 ? 'border-y-2' : 'border-b-2'}
+                            border-blue-100 p-2 flex items-center justify-center`}>
+                          {isRobotExist && (
+                            <img src={robot} alt="robot" className={`w-1/2 ${rotateClass}`} />
+                          )}
+                          {
+                            isMoneyExist && !isRobotExist && <div className='font-bold text-xl'>
+                              ${randomMoneyMap[rowIndex as keyof typeof randomMoneyMap][colIndex]}
+                            </div>
+                          } 
+                        </div>
+                      )
+                    })
                 }
               </div>
             )

@@ -3,13 +3,31 @@ interface InputProps {
   placeholder?: string;
   type?: 'text' | 'number';
   onChange?: (val: string) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   label?: string;
 }
-export default function Input({type = 'text', placeholder = '', value = '', onChange, label = ''}: InputProps) {
+export default function Input({
+  type = 'text',
+  placeholder = '',
+  value = '',
+  onChange,
+  onFocus,
+  onBlur,
+  label = ''
+}: InputProps) {
   return (
     <div className="w-full">
       <p>{label}</p>
       <input
+        onFocus={(event) => {
+          event.preventDefault();
+          onFocus?.();
+        }}
+        onBlur={(event) => {
+          event.preventDefault();
+          onBlur?.();
+        }}
         type={type}
         placeholder={placeholder}
         value={value}
