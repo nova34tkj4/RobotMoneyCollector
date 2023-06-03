@@ -1,9 +1,11 @@
 import Grid, { type RobotPosition } from "./components/Grid";
 import Modal from "./components/Modal";
+import TutorialList from "./components/TutorialList";
+import Credits from "./components/Credits";
 import compass from "./assets/compass.png";
 import * as React from "react";
 import Input from "./components/Input";
-import { COMMANDS, ERRORS, FACING_DIRECTIONS, ORIENTATION } from "./constants";
+import { COMMANDS, ERRORS, FACING_DIRECTIONS, FACING_FROM_DEGREE, INITIAL_ROTATE_DEG, ORIENTATION } from "./constants";
 import { isRobotOnTable, isValidCoordinate } from "./utils";
 
 function App() {
@@ -11,75 +13,127 @@ function App() {
   const [rows, setRows] = React.useState<number>();
   const [cols, setCols] = React.useState<number>();
   const [errorMessage, setErrorMessage] = React.useState('');
-  const [robotPosition, setRobotPosition] = React.useState<RobotPosition>({ x: undefined, y: undefined, f: 'EAST'});
+  const [robotPosition, setRobotPosition] = React.useState<RobotPosition>({ x: undefined, y: undefined });
+  const [facingPostion, setFacingPosition] = React.useState<RobotPosition>({ x: 0, y: 0 });
+  const [rotateDeg, setRotateDeg] = React.useState(0);
   const [isRobotPlaced, setIsRobotPlaced] = React.useState(false);
+  const [totalMove, setTotalMove] = React.useState(15);
 
-  const runCommand = () => {
+  React.useEffect(() => {
+    document.addEventListener('keyup', (event: KeyboardEvent) => {
+      if (event.code === "Space" && isRobotPlaced) {
+        runCommand('MOVE')
+      }
+    })
+  }, [])
+
+  const moveLeftRight = (type: 'left' | 'right') => {
+    const {x, y} = robotPosition || {};
+    let deg = rotateDeg - 90
+    let rotate = deg === -90 ? 270 : deg
+    if (type === 'right') {
+      deg = rotateDeg + 90
+      rotate = deg === 360 ? 0 : deg;
+    }
+    setRobotPosition({x, y})
+    setTextCommand('');
+
+    setRotateDeg(rotate)
+    const direction = FACING_FROM_DEGREE[rotate as keyof typeof FACING_FROM_DEGREE]
+    const {x: orX, y: orY} = ORIENTATION[direction as keyof typeof ORIENTATION];
+    setFacingPosition({x: orX, y: orY})
+  }
+
+  const runCommand = (keyboardCommand?: string) => {
     const commandVal = textCommand.split(/[\s,]+/);
-    const command = commandVal[0];
+    const command = keyboardCommand || commandVal[0];
+    const {x, y} = robotPosition || {};
+    const {x: facingX = 0, y: facingY = 0} = facingPostion || {}
     if (command) {
       if (!COMMANDS.includes(command)) {
         setErrorMessage(ERRORS.INVALID_COMMAND)
         return;
-      } else {
-        switch (command) {
-          case 'PLACE': {
-            if (commandVal.length < 4) {
-              setErrorMessage(ERRORS.INVALID_INITIAL_COMMAND);
-            } else {
-              const x = Number(commandVal[1]);
-              const y = Number(commandVal[2]);
-              const f = commandVal[3];
+      } 
+
+      if (!isRobotPlaced && command !== 'PLACE') {
+        setErrorMessage(ERRORS.NOT_INITIALIZED);
+        return;
+      }
       
-              if (!isValidCoordinate(x) || !isValidCoordinate(y)) {
-                setErrorMessage(ERRORS.WRONG_COORDINATE);
-                return;
-              }
-      
-              if (!FACING_DIRECTIONS.includes(f)) {
-                setErrorMessage(ERRORS.WRONG_DIRECTION);
-                return;
-              }
-      
-              if (!isRobotOnTable({ rows, cols, x, y })) {
-                setErrorMessage(ERRORS.WRONG_PLACE);
-                return;
-              }
-              setRobotPosition({x, y, f})
-              setIsRobotPlaced(true);
-            }
-            return;
-          }
-          case 'MOVE': {
-            if (!isRobotPlaced) {
-              setErrorMessage(ERRORS.NOT_INITIALIZED);
+      switch (command) {
+        case 'PLACE': {
+          if (commandVal.length < 4) {
+            setErrorMessage(ERRORS.INVALID_INITIAL_COMMAND);
+          } else {
+            const x = Number(commandVal[1]);
+            const y = Number(commandVal[2]);
+            const f = commandVal[3];
+    
+            if (!isValidCoordinate(x) || !isValidCoordinate(y)) {
+              setErrorMessage(ERRORS.WRONG_COORDINATE);
               return;
             }
-            const {x, y, f} = robotPosition || {};
-            const {x: facingX, y: facingY} = ORIENTATION[f as keyof typeof ORIENTATION] || {};
-            if (x && y) {
-              const nextX = x + facingX;
-              const nextY = y + facingY;
-              console.log("nextX", nextX)
-              console.log("nextX", nextY)
-      
-              if (!isRobotOnTable({ rows, cols, x: nextX, y: nextY })) {
-                setErrorMessage(ERRORS.WRONG_MOVING_DIRECTION);
-                return;
-              }
-              setRobotPosition({x: nextX, y: nextY, f})
+    
+            if (!FACING_DIRECTIONS.includes(f)) {
+              setErrorMessage(ERRORS.WRONG_DIRECTION);
+              return;
             }
+    
+            if (!isRobotOnTable({ rows, cols, x, y })) {
+              setErrorMessage(ERRORS.WRONG_PLACE);
+              return;
+            }
+            setRobotPosition({x, y})
+            setIsRobotPlaced(true);
+            setTextCommand('');
+            const {x: facingX, y: facingY} = ORIENTATION[f as keyof typeof ORIENTATION] || {};
+            setFacingPosition({x: facingX, y: facingY})
+            setRotateDeg(INITIAL_ROTATE_DEG[f as keyof typeof INITIAL_ROTATE_DEG])
+          }
+          return;
+        }
+        case 'MOVE': {
+          console.log("di sini")
+          if (totalMove === 0) {
+            setErrorMessage(ERRORS.EMPTY_MOVE);
             return;
           }
-          case 'LEFT': {
-            return;
+          if (x !== undefined && y !== undefined) {
+            const nextX = x + facingX;
+            const nextY = y + facingY;
+            console.log(nextX, nextY)
+    
+            if (!isRobotOnTable({ rows, cols, x: nextX, y: nextY })) {
+              setErrorMessage(ERRORS.WRONG_MOVING_DIRECTION);
+              return;
+            }
+            setRobotPosition({x: nextX, y: nextY})
+            setTotalMove(val => val - 1);
+            setTextCommand('');
           }
-          case 'RIGHT': {
-            return;
-          }
+          return;
+        }
+        case 'LEFT': {
+          moveLeftRight('left')
+          return;
+        }
+        case 'RIGHT': {
+          moveLeftRight('right')
+          return;
         }
       }
+
     }
+  }
+
+  const reset = () => {
+    setRobotPosition({x: undefined, y: undefined})
+    setFacingPosition({x: 0, y: 0})
+    setTextCommand('');
+    setErrorMessage('');
+    setIsRobotPlaced(false);
+    setRotateDeg(0);
+    setTotalMove(15)
   }
 
   return (
@@ -99,11 +153,13 @@ function App() {
               onChange={(val: string) => setTextCommand(val.toUpperCase())}
             />
             <button
-              onClick={runCommand}
+              onClick={() => runCommand()}
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-2 rounded">
               Run
             </button>
-            <button className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+            <button
+              onClick={reset}
+              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
               Reset
             </button>
           </div>
@@ -128,46 +184,23 @@ function App() {
           onChange={(val: string) => setCols(Number(val))}
         />
       </div>
-      
-      <Grid rows={rows} cols={cols} robotPosition={robotPosition} />
+      <Grid
+        totalMove={totalMove}
+        rows={rows}
+        cols={cols}
+        robotPosition={robotPosition}
+        rotateDeg={rotateDeg}
+      />
       <Modal
         title="Error Occured"
         isShow={!!errorMessage}
         description={errorMessage}
         onOk={() => setErrorMessage('')}
       />
-      <h1 className="font-bold text-2xl mt-10 mb-4">
-        TUTORIAL
-      </h1>
-      <ul className="list-disc">
-        <li>
-          <p className="font-bold text-xl">PLACE X,Y,F</p>
-          <p>PLACE will put the toy robot on the table in position X, Y and facing NORTH, SOUTH, EAST or WEST. The origin (0,0) can be the SOUTH WEST most corner.</p>
-        </li>
-        <li>
-          <p className="font-bold text-xl">MOVE</p>
-          <p>MOVE will move the toy robot one unit forward in the direction it is currently facing. </p>
-        </li>
-        <li>
-          <p className="font-bold text-xl">LEFT & RIGHT</p>
-          <p>LEFT and RIGHT will rotate the robot 90 degrees in the specified direction without changing the position of the robot. User can use arrow keys to change the direction of the robot.</p>
-        </li>
-        <li>
-          <p className="font-bold text-xl">GAME OVER</p>
-          <p>The game over when the robot has collected all the money OR total movement = 0. When the game over you can send the game result to server.</p>
-        </li>
-      </ul>
-      <h1 className="font-bold text-2xl mt-10 mb-4">
-        CREDITS
-      </h1>
-      <div>
-        <a href="https://www.flaticon.com/free-icons/compass" title="compass icons">Compass icons created by Freepik - Flaticon</a>
-      </div>
-      <div>
-        <a href="https://www.flaticon.com/free-icons/robot" title="robot icons">Robot icons created by Smashicons - Flaticon</a>
-      </div>
+      <TutorialList />
+      <Credits />
     </div>
   )
 }
 
-export default App
+export default App;

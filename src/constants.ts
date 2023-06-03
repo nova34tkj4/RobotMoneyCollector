@@ -7,10 +7,17 @@ export const ORIENTATION = {
 };
 
 export const INITIAL_ROTATE_DEG = {
-  NORTH: '-rotate-90',
-  EAST: 'rotate-0',
-  SOUTH: 'rotate-90',
-  WEST: 'scale-x-[-1]'
+  NORTH: 0,
+  EAST: 90,
+  SOUTH: 180,
+  WEST: 270
+};
+
+export const FACING_FROM_DEGREE = {
+  0: "NORTH",
+  90: "EAST",
+  180: "SOUTH",
+  270: "WEST"
 };
 
 export const FACING_DIRECTIONS = Object.keys(ORIENTATION);
@@ -18,6 +25,7 @@ export const FACING_DIRECTIONS = Object.keys(ORIENTATION);
 export const COMMANDS = ['PLACE', 'MOVE', 'LEFT', 'RIGHT'];
 
 export const ERRORS = {
+  EMPTY_MOVE: "Your move is empty. You can't move anymore",
   INVALID_COMMAND: `Invalid command format. Available commands are ${COMMANDS.join(' | ')}.`,
   INVALID_INITIAL_COMMAND: `Invalid PLACE command format. The valid PLACE command should be 'PLACE X,Y,F'.`,
   NOT_INITIALIZED: `The robot is not placed on the table yet. Place it first with 'PLACE X,Y,F'`,

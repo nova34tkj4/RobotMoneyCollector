@@ -1,24 +1,28 @@
-import robot from '../../assets/robotics.png'
-import { INITIAL_ROTATE_DEG } from '../../constants';
+import robot from '../../assets/robot.png'
+import { getRotateClass } from '../../utils';
 
 export interface RobotPosition {
   x: number | undefined;
   y: number | undefined;
-  f: string;
 }
 
 interface GridProps {
   cols?: number;
   rows?: number;
   robotPosition?: RobotPosition;
+  rotateDeg?: number;
+  totalMove: number;
 }
-export default function Grid({cols = 5, rows = 5, robotPosition}: GridProps) {
-  const {x, y, f = 'EAST'} = robotPosition || {};
-  const rotate = INITIAL_ROTATE_DEG[f as keyof typeof INITIAL_ROTATE_DEG];
+
+export default function Grid({cols = 5, rows = 5, robotPosition, rotateDeg = 0, totalMove}: GridProps) {
+  const {x, y} = robotPosition || {};
+  const rotateClass = getRotateClass(rotateDeg);
   const arrCols = Array.from(Array(cols), (_,i) => i+1)
   const arrRows = Array.from(Array(rows), (_,i) => i+1)
+
   return (
     <div>
+      <p className='text-right'>Total move: {totalMove}</p>
       <div className='flex flex-row'>
         <div className='mr-2'>
           Y
@@ -41,7 +45,7 @@ export default function Grid({cols = 5, rows = 5, robotPosition}: GridProps) {
                           ${rowIndex === 0 ? 'border-y-2' : 'border-b-2'}
                           border-blue-100 p-2 flex items-center justify-center`}>
                             {x === colIndex && y === rowIndex && (
-                              <img src={robot} alt="robot" className={`w-1/2 ${rotate}`} />
+                              <img src={robot} alt="robot" className={`w-1/2 ${rotateClass}`} />
                             )}
                               
                       </div>
