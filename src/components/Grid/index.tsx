@@ -13,7 +13,6 @@ interface GridProps {
   robotPosition?: RobotPosition;
   rotateDeg?: number;
   totalMove: number;
-  isPlaced: boolean;
 }
 
 export default function Grid({
@@ -22,7 +21,6 @@ export default function Grid({
   robotPosition,
   rotateDeg = 0,
   totalMove,
-  isPlaced,
 }: GridProps) {
   const {x, y} = robotPosition || {};
   const randomMoneyVal = getRandomMoney(rows, cols);

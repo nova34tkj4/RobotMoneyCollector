@@ -201,7 +201,6 @@ function App() {
         />
       </div>
       <Grid
-        isPlaced={isRobotPlaced}
         totalMove={totalMove}
         rows={rows}
         cols={cols}
