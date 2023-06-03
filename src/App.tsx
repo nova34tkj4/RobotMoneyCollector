@@ -22,6 +22,7 @@ function App() {
   const [isFocusTextCommand, setFocusTextCommand] = React.useState(false);
   const [isReset, setIsReset] = React.useState(false);
   const [isGameOver, setIsGameOver] = React.useState(false);
+  const [payloadData, setPayloadData] = React.useState<Payload>();
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (isRobotPlaced && !isFocusTextCommand) {
@@ -166,15 +167,28 @@ function App() {
   }
 
   const onGameOver = (payload: Payload) => {
-    const payloadData = {
+    const data = {
       ...payload,
       movementHistories,
     }
-    console.log("payload", payloadData);
+
+    setPayloadData(data);
     setIsGameOver(true);
   }
-  const onSendData = () => {
+  const onSendData = async () => {
+    console.log("payload", payloadData);
     setIsGameOver(false);
+    const response = await fetch('http://localhost:3000/collect-data', {
+      method: 'POST',
+      body: JSON.stringify(payloadData),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    })
+
+    const result = await response.json();
+    console.log(result)
   }
 
   return (

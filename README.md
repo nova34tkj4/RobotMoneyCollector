@@ -29,3 +29,7 @@ yarn
 ```
 yarn dev
 ```
+
+### Notes
+- By default this app is running on port 5173
+- Please run your BE service, if you want to send the data to the server
