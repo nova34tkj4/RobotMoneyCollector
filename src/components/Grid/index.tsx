@@ -1,10 +1,20 @@
 import * as React from 'react';
 import robot from '../../assets/robot.png'
 import { getRotateClass, getRandomMoney, generateRandomNumber, numberWithCommas } from '../../utils';
+import { nanoid } from 'nanoid';
 
 export interface RobotPosition {
   x: number | undefined;
   y: number | undefined;
+}
+
+export interface Payload {
+  userId: string;
+  totalMoneyAvailable: number;
+  movementHistorie?: string[];
+  totalMoneyFound: number;
+  interestRate: number;
+  totalMoneyEarn: number;
 }
 
 interface GridProps {
@@ -14,7 +24,7 @@ interface GridProps {
   rotateDeg?: number;
   totalMove: number;
   isReset: boolean;
-  onEmptyMoneyInTheBox?: () => void;
+  onGameOver?: (payload: Payload) => void;
 }
 
 let availableMoney = 0;
@@ -25,7 +35,7 @@ export default function Grid({
   rotateDeg = 0,
   totalMove,
   isReset,
-  onEmptyMoneyInTheBox
+  onGameOver
 }: GridProps) {
   const [randomMoney, setRandomMoney] = React.useState({});
   const [randomInterestRate, setRandomInterestRate] = React.useState(5);
@@ -44,8 +54,21 @@ export default function Grid({
     } else {
       setMoneyEarned(Math.floor(moneyFound + (moneyFound * randomInterestRate/100)));
     }
-    if (moneyFound > 0 && availableMoney === 0) onEmptyMoneyInTheBox?.();
-  }, [moneyFound, availableMoney]);
+  }, [moneyFound, randomInterestRate, availableMoney]);
+
+  React.useEffect(() => {
+    if (totalMove <= 0 || (moneyFound > 0 && availableMoney === 0)) {
+      const userId = nanoid();
+      const payload = {
+        userId,
+        totalMoneyAvailable: availableMoney + moneyFound,
+        totalMoneyFound: moneyFound,
+        interestRate: randomInterestRate,
+        totalMoneyEarn: moneyEarned
+      }
+      onGameOver?.(payload);
+    }
+  }, [totalMove, moneyFound, availableMoney, randomInterestRate])
 
   React.useEffect(() => {
     availableMoney = 0;

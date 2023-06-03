@@ -1,4 +1,4 @@
-import Grid, { type RobotPosition } from "./components/Grid";
+import Grid, { Payload, type RobotPosition } from "./components/Grid";
 import Modal from "./components/Modal";
 import TutorialList from "./components/TutorialList";
 import Credits from "./components/Credits";
@@ -8,7 +8,8 @@ import Input from "./components/Input";
 import { COMMANDS, ERRORS, FACING_DIRECTIONS, FACING_FROM_DEGREE, INITIAL_ROTATE_DEG, ORIENTATION } from "./constants";
 import { isRobotOnTable, isValidCoordinate } from "./utils";
 
-const facingPosition = { x: 0, y: 0 };
+let facingPosition = { x: 0, y: 0 };
+let movementHistories: string[] = [];
 function App() {
   const [textCommand, setTextCommand] = React.useState('');
   const [rows, setRows] = React.useState<number>(5);
@@ -85,6 +86,7 @@ function App() {
       switch (command) {
         case 'PLACE': {
           reset();
+          movementHistories.push(textCommand);
           if (commandVal.length < 4) {
             setErrorMessage(ERRORS.INVALID_INITIAL_COMMAND);
           } else {
@@ -117,6 +119,7 @@ function App() {
           return;
         }
         case 'MOVE': {
+          movementHistories.push(command);
           if (totalMove <= 0) {
             setIsGameOver(true);
             return;
@@ -136,19 +139,22 @@ function App() {
           return;
         }
         case 'LEFT': {
+          movementHistories.push(command);
           moveLeftRight('left')
           return;
         }
         case 'RIGHT': {
+          movementHistories.push(command);
           moveLeftRight('right')
           return;
         }
       }
-
     }
   }
 
   const reset = () => {
+    movementHistories = [];
+    facingPosition = { x: 0, y: 0 };
     setIsGameOver(false);
     setRobotPosition({x: undefined, y: undefined})
     setTextCommand('');
@@ -159,6 +165,14 @@ function App() {
     setIsReset(val => !val);
   }
 
+  const onGameOver = (payload: Payload) => {
+    const payloadData = {
+      ...payload,
+      movementHistories,
+    }
+    console.log("payload", payloadData);
+    setIsGameOver(true);
+  }
   const onSendData = () => {
     setIsGameOver(false);
   }
@@ -224,7 +238,7 @@ function App() {
         cols={cols}
         robotPosition={robotPosition}
         rotateDeg={rotateDeg}
-        onEmptyMoneyInTheBox={() => {setIsGameOver(true)}}
+        onGameOver={onGameOver}
       />
       <Modal
         title="Error Occured"
