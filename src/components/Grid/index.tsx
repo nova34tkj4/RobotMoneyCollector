@@ -1,6 +1,6 @@
 import * as React from 'react';
 import robot from '../../assets/robot.png'
-import { getRotateClass, getRandomMoney, generateRandomNumber } from '../../utils';
+import { getRotateClass, getRandomMoney, generateRandomNumber, numberWithCommas } from '../../utils';
 
 export interface RobotPosition {
   x: number | undefined;
@@ -14,24 +14,53 @@ interface GridProps {
   rotateDeg?: number;
   totalMove: number;
   isReset: boolean;
+  onEmptyMoneyInTheBox?: () => void;
 }
 
+let availableMoney = 0;
 export default function Grid({
   cols = 5,
   rows = 5,
   robotPosition,
   rotateDeg = 0,
   totalMove,
-  isReset
+  isReset,
+  onEmptyMoneyInTheBox
 }: GridProps) {
   const [randomMoney, setRandomMoney] = React.useState({});
   const [randomInterestRate, setRandomInterestRate] = React.useState(5);
+  const [moneyEarned, setMoneyEarned] = React.useState(0);
+  const [moneyFound, setMoneyFound] = React.useState(0);
   const {x, y} = robotPosition || {};
 
   React.useEffect(() => {
     setRandomInterestRate(generateRandomNumber(5, 25));
     setRandomMoney(getRandomMoney(rows, cols));
   }, [isReset, cols, rows])
+
+  React.useEffect(() => {
+    if (moneyEarned === 0) {
+      setMoneyEarned(moneyFound);
+    } else {
+      setMoneyEarned(moneyFound + (moneyFound * randomInterestRate/100));
+    }
+    if (moneyFound > 0 && availableMoney === 0) onEmptyMoneyInTheBox?.();
+  }, [moneyFound, availableMoney]);
+
+  React.useEffect(() => {
+    availableMoney = 0;
+    Object.keys(randomMoney).forEach((keyRow: unknown) => {
+      const rowVal = randomMoney[keyRow as keyof typeof keyRow];
+      Object.keys(rowVal).forEach((keyCol: unknown) => {
+        if (x === Number(keyRow) && y === Number(keyCol)) {
+          const found = randomMoney[x as keyof typeof randomMoney][y];
+          delete randomMoney[x as keyof typeof randomMoney][y];
+          setMoneyFound(val => val + found)
+        }
+        availableMoney = availableMoney + randomMoney[Number(keyRow) as keyof typeof randomMoney][Number(keyCol)];
+      });
+    });
+  }, [x, y, randomMoney, availableMoney])
   
   const rotateClass = getRotateClass(rotateDeg);
   const arrCols = Array.from(Array(cols), (_,i) => i+1)
@@ -41,9 +70,7 @@ export default function Grid({
     <div>
       <p className='text-right'>Total move: {totalMove}</p>
       <div className='flex flex-row'>
-        <div className='mr-2'>
-          Y
-        </div>
+
         <div className='w-full'>
         {
           arrRows.map((_, rowIndex) => {
@@ -54,9 +81,8 @@ export default function Grid({
               >
                 {
                     arrCols.map((_, colIndex) => {
-                      const randomMoneyMap = randomMoney;
-                      const isMoneyExist = randomMoneyMap && randomMoneyMap[rowIndex as keyof typeof randomMoneyMap] !== undefined 
-                        && randomMoneyMap[rowIndex as keyof typeof randomMoneyMap][colIndex] !== undefined;
+                      const isMoneyExist = randomMoney && randomMoney[colIndex as keyof typeof randomMoney] !== undefined 
+                        && randomMoney[colIndex as keyof typeof randomMoney][rowIndex] !== undefined;
                       const isRobotExist = x !== undefined &&  y !== undefined && x === colIndex && y === rowIndex;
                       return (
                         <div
@@ -71,7 +97,7 @@ export default function Grid({
                           )}
                           {
                             isMoneyExist && !isRobotExist && <div className='font-bold text-xl'>
-                              ${randomMoneyMap[rowIndex as keyof typeof randomMoneyMap][colIndex]}
+                              ${randomMoney[colIndex as keyof typeof randomMoney][rowIndex]}
                             </div>
                           } 
                         </div>
@@ -84,8 +110,7 @@ export default function Grid({
         }
         </div>
       </div>
-      <p className='text-right'>X</p>
-      <div className='bg-blue-100 rounded p-4'>
+      <div className='bg-blue-100 rounded p-4 mt-4'>
         <p className='text-center font-bold mb-4 text-xl'>
             Your Robot Earning
         </p>
@@ -93,7 +118,7 @@ export default function Grid({
           <div className='flex flex-row'>
             <div className='flex flex-1 flex-col'>
               <div className='text-center font-bold'>
-                2000
+                {numberWithCommas(moneyFound)}
               </div>
               <div className='text-center'>
                 Money Found
@@ -109,7 +134,7 @@ export default function Grid({
             </div>
             <div className='flex flex-1 flex-col'>
               <div className='text-center font-bold'>
-                2100
+                {numberWithCommas(moneyEarned)}
               </div>
               <div className='text-center'>
                 Money Earned

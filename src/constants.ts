@@ -25,7 +25,6 @@ export const FACING_DIRECTIONS = Object.keys(ORIENTATION);
 export const COMMANDS = ['PLACE', 'MOVE', 'LEFT', 'RIGHT'];
 
 export const ERRORS = {
-  EMPTY_MOVE: "Your move is empty. You can't move anymore",
   INVALID_COMMAND: `Invalid command format. Available commands are ${COMMANDS.join(' | ')}.`,
   INVALID_INITIAL_COMMAND: `Invalid PLACE command format. The valid PLACE command should be 'PLACE X,Y,F'.`,
   NOT_INITIALIZED: `The robot is not placed on the table yet. Place it first with 'PLACE X,Y,F'`,

@@ -28,7 +28,7 @@ export const deepMergeObject = (targetObject = {}, sourceObject = {}) => {
   const copySourceObject = JSON.parse(JSON.stringify(sourceObject));
   Object.keys(copySourceObject).forEach((key) => {
     if (typeof copySourceObject[key] === "object" && !Array.isArray(copySourceObject[key])) {
-      copyTargetObject[key] = deepMergeObject(
+      copyTargetObject[key] = (
         copyTargetObject[key],
         copySourceObject[key]
       );
@@ -58,4 +58,8 @@ export const getRandomMoney = (rows: number, cols: number) => {
     randomMoneyMap = deepMergeObject(randomMoneyMap, item);
   });
   return randomMoneyMap;
+}
+
+export const numberWithCommas = (x: number) => {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }

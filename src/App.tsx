@@ -20,6 +20,7 @@ function App() {
   const [totalMove, setTotalMove] = React.useState(15);
   const [isFocusTextCommand, setFocusTextCommand] = React.useState(false);
   const [isReset, setIsReset] = React.useState(false);
+  const [isGameOver, setIsGameOver] = React.useState(false);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (isRobotPlaced && !isFocusTextCommand) {
@@ -117,7 +118,7 @@ function App() {
         }
         case 'MOVE': {
           if (totalMove <= 0) {
-            setErrorMessage(ERRORS.EMPTY_MOVE);
+            setIsGameOver(true);
             return;
           }
           if (x !== undefined && y !== undefined) {
@@ -148,6 +149,7 @@ function App() {
   }
 
   const reset = () => {
+    setIsGameOver(false);
     setRobotPosition({x: undefined, y: undefined})
     setTextCommand('');
     setErrorMessage('');
@@ -218,12 +220,19 @@ function App() {
         cols={cols}
         robotPosition={robotPosition}
         rotateDeg={rotateDeg}
+        onEmptyMoneyInTheBox={() => {setIsGameOver(true)}}
       />
       <Modal
         title="Error Occured"
         isShow={!!errorMessage}
         description={errorMessage}
         onOk={() => {setErrorMessage('')}}
+      />
+      <Modal
+        title="Game Over"
+        isShow={isGameOver}
+        buttonLabel={"Send Data"}
+        onOk={() => {console.log("Game Over")}}
       />
       <TutorialList />
       <Credits />

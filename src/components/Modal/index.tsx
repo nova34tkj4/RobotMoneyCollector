@@ -2,9 +2,10 @@ interface ModalProps {
   isShow?: boolean;
   title?: string;
   description?: string;
+  buttonLabel?: string;
   onOk?: () => void;
 }
-export default function Modal({title = '', description = '', isShow = false, onOk}: ModalProps) {
+export default function Modal({title = '', description = '', isShow = false, onOk, buttonLabel}: ModalProps) {
   if (!isShow) return null;
   return (
     <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 py-10">
@@ -16,7 +17,7 @@ export default function Modal({title = '', description = '', isShow = false, onO
               <p className="text-gray-600">{description}</p>
             </div>
             <div className="space-y-4">
-              <button onClick={onOk} className="p-3 bg-black rounded-full text-white w-full font-semibold">Got it</button>
+              <button onClick={onOk} className="p-3 bg-blue-500 rounded-full text-white w-full font-semibold">{buttonLabel || "Got it"}</button>
             </div>
           </div>
         </div>
