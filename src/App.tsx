@@ -8,13 +8,13 @@ import Input from "./components/Input";
 import { COMMANDS, ERRORS, FACING_DIRECTIONS, FACING_FROM_DEGREE, INITIAL_ROTATE_DEG, ORIENTATION } from "./constants";
 import { isRobotOnTable, isValidCoordinate } from "./utils";
 
+const facingPosition = { x: 0, y: 0 };
 function App() {
   const [textCommand, setTextCommand] = React.useState('');
   const [rows, setRows] = React.useState<number>();
   const [cols, setCols] = React.useState<number>();
   const [errorMessage, setErrorMessage] = React.useState('');
   const [robotPosition, setRobotPosition] = React.useState<RobotPosition>({ x: undefined, y: undefined });
-  const [facingPostion, setFacingPosition] = React.useState<RobotPosition>({ x: 0, y: 0 });
   const [rotateDeg, setRotateDeg] = React.useState(0);
   const [isRobotPlaced, setIsRobotPlaced] = React.useState(false);
   const [totalMove, setTotalMove] = React.useState(15);
@@ -53,14 +53,15 @@ function App() {
     setRotateDeg(rotate)
     const direction = FACING_FROM_DEGREE[rotate as keyof typeof FACING_FROM_DEGREE]
     const {x: orX, y: orY} = ORIENTATION[direction as keyof typeof ORIENTATION];
-    setFacingPosition({x: orX, y: orY})
+    facingPosition.x = orX;
+    facingPosition.y = orY;
   }
 
   const runCommand = (keyboardCommand?: string) => {
     const commandVal = textCommand.split(/[\s,]+/);
     const command = keyboardCommand || commandVal[0];
     const {x, y} = robotPosition || {};
-    const {x: facingX = 0, y: facingY = 0} = facingPostion || {}
+    const {x: facingX = 0, y: facingY = 0} = facingPosition || {}
     if (command) {
       if (!COMMANDS.includes(command)) {
         setErrorMessage(ERRORS.INVALID_COMMAND)
@@ -99,7 +100,8 @@ function App() {
             setIsRobotPlaced(true);
             setTextCommand('');
             const {x: facingX, y: facingY} = ORIENTATION[f as keyof typeof ORIENTATION] || {};
-            setFacingPosition({x: facingX, y: facingY})
+            facingPosition.x = facingX;
+            facingPosition.y = facingY;
             setRotateDeg(INITIAL_ROTATE_DEG[f as keyof typeof INITIAL_ROTATE_DEG])
           }
           return;
@@ -110,8 +112,8 @@ function App() {
             return;
           }
           if (x !== undefined && y !== undefined) {
-            const nextX = x + facingX;
-            const nextY = y + facingY;
+            const nextX = x + facingPosition.x ;
+            const nextY = y + facingPosition.y;
     
             if (!isRobotOnTable({ rows, cols, x: nextX, y: nextY })) {
               setErrorMessage(ERRORS.WRONG_MOVING_DIRECTION);
