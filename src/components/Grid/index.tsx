@@ -13,6 +13,7 @@ interface GridProps {
   robotPosition?: RobotPosition;
   rotateDeg?: number;
   totalMove: number;
+  isReset: boolean;
 }
 
 export default function Grid({
@@ -21,11 +22,16 @@ export default function Grid({
   robotPosition,
   rotateDeg = 0,
   totalMove,
+  isReset
 }: GridProps) {
+  const [randomMoney, setRandomMoney] = React.useState({});
+  const [randomInterestRate, setRandomInterestRate] = React.useState(5);
   const {x, y} = robotPosition || {};
-  const randomMoneyVal = getRandomMoney(rows, cols);
-  const randomMoney = React.useRef(randomMoneyVal)
-  const randomInterestRate = generateRandomNumber(5, 25)
+
+  React.useEffect(() => {
+    setRandomInterestRate(generateRandomNumber(5, 25));
+    setRandomMoney(getRandomMoney(rows, cols));
+  }, [isReset, cols, rows])
   
   const rotateClass = getRotateClass(rotateDeg);
   const arrCols = Array.from(Array(cols), (_,i) => i+1)
@@ -48,7 +54,7 @@ export default function Grid({
               >
                 {
                     arrCols.map((_, colIndex) => {
-                      const randomMoneyMap = randomMoney.current;
+                      const randomMoneyMap = randomMoney;
                       const isMoneyExist = randomMoneyMap && randomMoneyMap[rowIndex as keyof typeof randomMoneyMap] !== undefined 
                         && randomMoneyMap[rowIndex as keyof typeof randomMoneyMap][colIndex] !== undefined;
                       const isRobotExist = x !== undefined &&  y !== undefined && x === colIndex && y === rowIndex;

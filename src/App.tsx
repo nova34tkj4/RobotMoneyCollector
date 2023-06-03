@@ -11,23 +11,27 @@ import { isRobotOnTable, isValidCoordinate } from "./utils";
 const facingPosition = { x: 0, y: 0 };
 function App() {
   const [textCommand, setTextCommand] = React.useState('');
-  const [rows, setRows] = React.useState<number>();
-  const [cols, setCols] = React.useState<number>();
+  const [rows, setRows] = React.useState<number>(5);
+  const [cols, setCols] = React.useState<number>(5);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [robotPosition, setRobotPosition] = React.useState<RobotPosition>({ x: undefined, y: undefined });
   const [rotateDeg, setRotateDeg] = React.useState(0);
   const [isRobotPlaced, setIsRobotPlaced] = React.useState(false);
   const [totalMove, setTotalMove] = React.useState(15);
   const [isFocusTextCommand, setFocusTextCommand] = React.useState(false);
+  const [isReset, setIsReset] = React.useState(false);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (isRobotPlaced && !isFocusTextCommand) {
-      event.preventDefault();
+
       if (event.code === "Space") {
+        event.preventDefault();
         runCommand('MOVE')
       } else if (event.code === "ArrowLeft") {
+        event.preventDefault();
         runCommand('LEFT')
       } else if (event.code === "ArrowRight") {
+        event.preventDefault();
         runCommand('RIGHT')
       }
     }
@@ -79,6 +83,7 @@ function App() {
       
       switch (command) {
         case 'PLACE': {
+          reset();
           if (commandVal.length < 4) {
             setErrorMessage(ERRORS.INVALID_INITIAL_COMMAND);
           } else {
@@ -148,7 +153,8 @@ function App() {
     setErrorMessage('');
     setIsRobotPlaced(false);
     setRotateDeg(0);
-    setTotalMove(15)
+    setTotalMove(15);
+    setIsReset(val => !val);
   }
 
   return (
@@ -194,18 +200,19 @@ function App() {
           label="Rows"
           type="number"
           placeholder="Input rows number"
-          value={rows}
-          onChange={(val: string) => {setRows(Number(val))}}
+          value={rows === 0 ? '' : rows}
+          onChange={(val: string) => {console.log(val); setRows(Number(val))}}
         />
         <Input
           label="Cols"
           type="number"
           placeholder="Input columns number"
-          value={cols}
+          value={cols === 0 ? '' : cols}
           onChange={(val: string) => {setCols(Number(val))}}
         />
       </div>
       <Grid
+        isReset={isReset}
         totalMove={totalMove}
         rows={rows}
         cols={cols}
