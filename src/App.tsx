@@ -20,36 +20,42 @@ function App() {
   const [totalMove, setTotalMove] = React.useState(15);
   const [isFocusTextCommand, setFocusTextCommand] = React.useState(false);
 
-  const handleKeyPress = (event: KeyboardEvent) => {
-    if (event.code === "Space" && isRobotPlaced && !isFocusTextCommand) {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (isRobotPlaced && !isFocusTextCommand) {
       event.preventDefault();
-      runCommand('MOVE')
+      console.log("Evetn code 2: ", event.code)
+      if (event.code === "Space") {
+        runCommand('MOVE')
+      } else if (event.code === "ArrowLeft") {
+        runCommand('LEFT')
+      } else if (event.code === "ArrowRight") {
+        runCommand('RIGHT')
+      }
     }
   }
 
   React.useEffect(() => {
-    document.addEventListener('keypress', handleKeyPress)
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
-      document.removeEventListener('keypress', handleKeyPress);
+      document.removeEventListener('keydown', handleKeyDown);
     }
   }, [
     isRobotPlaced,
     isFocusTextCommand,
+    facingPosition?.x,
+    facingPosition?.y,
     robotPosition?.x,
-    robotPosition?.y,
+    robotPosition?.y
   ])
 
   const moveLeftRight = (type: 'left' | 'right') => {
-    const {x, y} = robotPosition || {};
     let deg = rotateDeg - 90
     let rotate = deg === -90 ? 270 : deg
     if (type === 'right') {
       deg = rotateDeg + 90
       rotate = deg === 360 ? 0 : deg;
     }
-    setRobotPosition({x, y})
     setTextCommand('');
-
     setRotateDeg(rotate)
     const direction = FACING_FROM_DEGREE[rotate as keyof typeof FACING_FROM_DEGREE]
     const {x: orX, y: orY} = ORIENTATION[direction as keyof typeof ORIENTATION];
@@ -61,6 +67,7 @@ function App() {
     const commandVal = textCommand.split(/[\s,]+/);
     const command = keyboardCommand || commandVal[0];
     const {x, y} = robotPosition || {};
+    console.log("CMD", command)
     if (command) {
       if (!COMMANDS.includes(command)) {
         setErrorMessage(ERRORS.INVALID_COMMAND)
@@ -106,13 +113,15 @@ function App() {
           return;
         }
         case 'MOVE': {
-          if (totalMove === 0) {
+          console.log("MOVE", totalMove)
+          if (totalMove <= 0) {
             setErrorMessage(ERRORS.EMPTY_MOVE);
             return;
           }
           if (x !== undefined && y !== undefined) {
             const nextX = x + facingPosition.x ;
             const nextY = y + facingPosition.y;
+            console.log(nextX, nextY)
     
             if (!isRobotOnTable({ rows, cols, x: nextX, y: nextY })) {
               setErrorMessage(ERRORS.WRONG_MOVING_DIRECTION);
