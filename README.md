@@ -1,4 +1,4 @@
-# robot-money-collector
+# robot-money-collector (FE)
 Komunal - FullStack - Senior Developer Test
 
 ### Tech Stacks
