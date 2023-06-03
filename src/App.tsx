@@ -61,7 +61,6 @@ function App() {
     const commandVal = textCommand.split(/[\s,]+/);
     const command = keyboardCommand || commandVal[0];
     const {x, y} = robotPosition || {};
-    const {x: facingX = 0, y: facingY = 0} = facingPosition || {}
     if (command) {
       if (!COMMANDS.includes(command)) {
         setErrorMessage(ERRORS.INVALID_COMMAND)
@@ -140,7 +139,6 @@ function App() {
 
   const reset = () => {
     setRobotPosition({x: undefined, y: undefined})
-    setFacingPosition({x: 0, y: 0})
     setTextCommand('');
     setErrorMessage('');
     setIsRobotPlaced(false);
