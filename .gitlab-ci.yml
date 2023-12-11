@@ -1,0 +1,28 @@
+stages:
+  - build-be
+  - build-fe
+  
+build-be:
+  stage: build-be
+  image: quay.io/buildah/stable
+  variables:
+    BUILDAH_FORMAT: docker
+  script:
+  - buildah login -u "${username}" -p "${password}" "${registry}"
+  - cd server
+  - buildah build -t "${imagebe}"
+  - buildah push "${imagebe}"
+  only:
+    - main
+
+build-fe:
+  stage: build-fe
+  image: quay.io/buildah/stable
+  variables:
+    BUILDAH_FORMAT: docker
+  script:
+  - buildah login -u "${username}" -p "${password}" "${registry}"
+  - buildah build -t "${imagefe}" 
+  - buildah push "${imagefe}"
+  only:
+    - main
