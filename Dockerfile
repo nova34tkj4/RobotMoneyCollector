@@ -8,7 +8,7 @@ RUN npm install
 
 RUN npm run build
 
-FROM nginx:alpine
+FROM docker.io/nginx:alpine as web
 
 WORKDIR /usr/share/nginx/html
 
