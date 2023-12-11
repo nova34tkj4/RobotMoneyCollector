@@ -1,6 +1,7 @@
 stages:
   - build-be
   - build-fe
+  #- deploy
   
 build-be:
   stage: build-be
@@ -26,3 +27,13 @@ build-fe:
   - buildah push "${imagefe}"
   only:
     - main
+
+#deploy:
+#  stage: deploy
+#  image: dtzar/helm-kubectl
+#  script:
+#  - export KUBECONFIG=$KUBECONFIG:"${KUBECONFIG_PROD}"
+#  - kubectl rollout restart deployment "${namedeployment}" -n "${namespaces}"
+#  - kubectl get pod -n "${namespaces}"
+#  only:
+#    - main
